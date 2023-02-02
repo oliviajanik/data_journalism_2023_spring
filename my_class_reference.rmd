@@ -1,6 +1,6 @@
 ---
 title: "Class Reference"
-author: "Student name"
+author: "Olivia Janik"
 output:
   html_document:
     theme: cerulean
@@ -13,6 +13,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+print("hello puppy!")
 ```
 
 ## Introduction
@@ -33,3 +37,8 @@ setwd("~/Documents/GitHub/data_journalism_2023_spring")
 install.packages("tidyverse")
 library(tidyverse)
 ```
+### How to read in a csv file from the internet
+```{r}
+wes_moore_contributions <- read_csv("https://raw.githubusercontent.com/stephenneukam/CNS_Annapolis/main/Campaign_finance/Moore_ContributionsList.csv")
+```
+
