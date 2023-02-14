@@ -315,7 +315,7 @@ Mutate is even more useful when combined with some additional functions. Let's k
 
 **Task** Run the following code and look at the output. Then write a sentence or two describing what you think the mutate statement is doing step by step.
 
-**Answer**
+**Answer** The code is creating a new variable where there will be an added column that shows what state the expense occurred in. It uses the string detect feature to detect address lines with the word Maryland, then says that those rows will have the value MD in the state column. It follows this pattern for other states.
 
 ```{r}
 maryland_expenses_with_state <- maryland_expenses %>%
