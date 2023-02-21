@@ -158,7 +158,7 @@ head(maryland_expenses)
 
 Take a look at that first column, expenditure_date. It *looks* like a date, but see the `<chr` right below the column name? That means R thinks it's actually a character column. What we need to do is make it into an actual date column, which lubridate is very good at doing. It has a variety of functions that match the format of the data you have. In this case, the current format is `m/d/y`, and the lubridate function is called `mdy` that we can use with mutate:
 
-### Task 8: Turning a character date into a real date
+### Task 8: Turning a character date into a 5real date
 
 **Task** Run the following code and describe the change in the expenditure_date column.
 
