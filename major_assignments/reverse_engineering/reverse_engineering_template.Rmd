@@ -1,7 +1,7 @@
 ---
-title: "Reverse Engineering Project"
-author: "Student names here"
-date: "Date here"
+title: "Reverse Engineering Project (North Carolina In-Session Campaign Donations"
+author: "Olivia Janik and Mitchell Hang"
+date: "March 4, 2023"
 output:
   html_document:
     theme: cerulean
@@ -25,7 +25,11 @@ In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
 Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
-
+options(scipen = 999)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(stringr)
 ```
 
 ## Load and Cleaning Data
@@ -34,12 +38,22 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 ```{r}
 # Load required data
+NC_donors <- read_csv("data/donors0103-0701.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
 
-
+cleaned_NC_donors <- NC_donors %>%
+  mutate(date=mdy(date)) %>%
+  mutate(amount=parse_number(amount)) %>%
+  mutate(zip5 = str_sub(zip, start = 1L, end = 5L)) %>%
+  mutate(zip5 = case_when(
+    zip5 == "Vario" ~ as.character(NA),
+    zip5 == "UB7 O" ~ as.character(NA),
+    zip5 == "UB7 " ~ as.character(NA),
+    TRUE ~ zip5
+  ))
 ```
 
 ## Sentences to Engineer
@@ -47,11 +61,19 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: “Senate President Pro Tem Phil Berger's campaign alone raised nearly \$222,000 during session. Twenty-three people gave him the maximum allowed: \$5,200.”
+
+* **Analysis summary**: Based on the dates provided for the North Carolina session, we can confirm that 23 people donated \$5,200 (which was indeed the maximum amount given during this time) to Berger's campaign. When we calculated all of the amounts together, the total amount we got was \$221,925, which did match with the article.
 
 ```{r}
 # Put code to reverse engineer sentence here
+NC_donors_1 <- cleaned_NC_donors %>%
+ filter(between(date, as.Date('2018-05-16'), as.Date('2018-06-29'))) %>%
+filter(str_detect(committee_name, "BERGER")) %>%
+  group_by(`name-clean`) %>%
+  summarise(total_amount = sum(amount)) %>%
+  arrange(desc(total_amount)) %>%
+  bind_rows(summarize_all(., ~if(is.numeric(.)) sum(.) else "Total"))
 
 # Display results of code below this codeblock
 
@@ -59,11 +81,18 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 2
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: "This year, the week saw more than $1 million given to state legislative campaigns, the state Republican and Democratic parties and the governor's campaign account."
+
+* **Analysis summary**: Using this code, we were able to confirm that more than /$1 million was donated to state legislative campaigns, the Republican and Democratic parties and the governor's campaign. The total was 1,627,689 dollars.
 
 ```{r}
 # Put code to reverse engineer sentence here
+NC_donors_2 <- cleaned_NC_donors %>% 
+filter(between(date, as.Date('2018-05-09'), as.Date('2018-06-16'))) %>% 
+filter(str_detect(committee_name, "REC") | str_detect(committee_name, "Republican") | str_detect(committee_name, "DEC") |  str_detect(committee_name, "Democratic")) %>%
+  group_by(source) %>%
+  summarise(total_amount = sum(amount))
+  
 
 # Display results of code below this codeblock
 
@@ -71,11 +100,19 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 3
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: “There was a major bump during the first week of session this year for the state parties, but that's because three large donors – LinkedIn co-founder Reid Hoffman, Durham investor Greg Lindberg and Lindberg's Eli Research company – donated \$1.3 million that week to the state Republican and Democrat parties.”
+
+* **Analysis summary**: We gathered the party donations during the first week of session in 2018 (May 16th to 23rd) and the total amount that we calculated from the three names "GREG LINDBERG," "REID GARRETT HOFFMAN" and "ELI RESEARCH LLC" was $1,250,000. So the total amount during that week wasn't necessarily $1.3 million, but we guess many publications prefer rounding up to the nearest tenth decimal when using figures like these.
+
 
 ```{r}
 # Put code to reverse engineer sentence here
+NC_donors_3 <- cleaned_NC_donors %>%
+  filter(between(date, as.Date('2018-05-16'), as.Date('2018-05-23'))) %>%
+  filter(str_detect(source, "parties")) %>%
+  group_by('name-clean') %>%
+  summarize(total_amount = sum(amount)) %>%
+  arrange(desc(total_amount))
 
 # Display results of code below this codeblock
 
@@ -83,7 +120,8 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 4
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: “This year, 18 of the top 20 donors to legislators during the week before session were PACs. The other two were Strobel and Delmer.”
+
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
@@ -95,7 +133,8 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 5
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: “Going back to the beginning of the year, people connected to Prestage Farms gave Moore \$31,000 in campaign donations.”
+
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
