@@ -217,7 +217,7 @@ The Census Bureau has Zip Code Tabulation Areas - they are mostly identical to w
 ```{r}
 md_zipcodes <- get_acs(geography="zcta", variables = "B19013_001", state='MD', year=2019)
 md_high_schools_with_acs <- md_high_schools %>% left_join(md_zipcodes, by=c('zip'='GEOID'))
-md_high_schools_with_acs <- md_high_schools_with_acs %>% mutate(min=(estimate-moe), max=(estimate+moe)) %>% drop_na()
+md_high_schools_with_acs <- md_high_schools_with_acs %>% mutate(min=(estimate-moe), max=(estimate+moe)) %>% drop_na
 ```
 
 
