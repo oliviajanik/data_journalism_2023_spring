@@ -45,6 +45,7 @@ NC_donors <- read_csv("data/donors0103-0701.csv")
 # Clean required data and prepare for analysis if needed. 
 
 cleaned_NC_donors <- NC_donors %>%
+  clean_names() %>%
   mutate(date=mdy(date)) %>%
   mutate(amount=parse_number(amount)) %>%
   mutate(zip5 = str_sub(zip, start = 1L, end = 5L)) %>%
@@ -70,13 +71,13 @@ In this notebook, we are reverse engineering five sentences from the story.
 NC_donors_1 <- cleaned_NC_donors %>%
  filter(between(date, as.Date('2018-05-16'), as.Date('2018-06-29'))) %>%
 filter(str_detect(committee_name, "BERGER")) %>%
-  group_by(`name-clean`) %>%
+  group_by(`name_clean`) %>%
   summarise(total_amount = sum(amount)) %>%
   arrange(desc(total_amount)) %>%
   bind_rows(summarize_all(., ~if(is.numeric(.)) sum(.) else "Total"))
 
 # Display results of code below this codeblock
-
+view(NC_donors_1)
 ```
 
 ### Sentence 2
@@ -88,60 +89,61 @@ filter(str_detect(committee_name, "BERGER")) %>%
 ```{r}
 # Put code to reverse engineer sentence here
 NC_donors_2 <- cleaned_NC_donors %>% 
-filter(between(date, as.Date('2018-05-09'), as.Date('2018-06-16'))) %>% 
-filter(str_detect(committee_name, "REC") | str_detect(committee_name, "Republican") | str_detect(committee_name, "DEC") |  str_detect(committee_name, "Democratic")) %>%
+filter(between(date, as.Date('2018-05-09'), as.Date('2018-05-16'))) %>% 
   group_by(source) %>%
   summarise(total_amount = sum(amount))
   
 
 # Display results of code below this codeblock
-
+view(NC_donors_2)
 ```
 
 ### Sentence 3
 
 * **Sentence text**: “There was a major bump during the first week of session this year for the state parties, but that's because three large donors – LinkedIn co-founder Reid Hoffman, Durham investor Greg Lindberg and Lindberg's Eli Research company – donated \$1.3 million that week to the state Republican and Democrat parties.”
 
-* **Analysis summary**: We gathered the party donations during the first week of session in 2018 (May 16th to 23rd) and the total amount that we calculated from the three names "GREG LINDBERG," "REID GARRETT HOFFMAN" and "ELI RESEARCH LLC" was $1,250,000. So the total amount during that week wasn't necessarily $1.3 million, but we guess many publications prefer rounding up to the nearest tenth decimal when using figures like these.
-
+* **Analysis summary**: We gathered the party donations during the first week of session in 2018 (May 16th to 23rd) and the total amount that we calculated from the three names "GREG LINDBERG," "REID GARRETT HOFFMAN" and "ELI RESEARCH LLC" was \$1,250,000. So the total amount during that week wasn't necessarily \$1.3 million, but we guess many publications prefer rounding up to the nearest tenth decimal when using figures like these.
 
 ```{r}
 # Put code to reverse engineer sentence here
 NC_donors_3 <- cleaned_NC_donors %>%
   filter(between(date, as.Date('2018-05-16'), as.Date('2018-05-23'))) %>%
   filter(str_detect(source, "parties")) %>%
-  group_by('name-clean') %>%
+  group_by(name_clean) %>%
   summarize(total_amount = sum(amount)) %>%
   arrange(desc(total_amount))
-
 # Display results of code below this codeblock
-
+view(NC_donors_3)
 ```
 
 ### Sentence 4
 
 * **Sentence text**: “This year, 18 of the top 20 donors to legislators during the week before session were PACs. The other two were Strobel and Delmer.”
-
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: We were not able to confirm this finding because when we filtered for donations that came in the week before session, we found that only 14 of the top 20 donors were PACS. The other six were Greg Lindberg, George A Luecke, George Lewis Strobel II, Robin E Delmar, Matthew S Cullinan and Temple Sloan. 
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+NC_donors_4 <- cleaned_NC_donors %>%
+ filter(between(date, as.Date('2018-05-09'), as.Date('2018-05-15'))) %>%
+  group_by(name_clean) %>%
+  summarize(total_amount = sum(amount)) %>%
+  arrange(desc(total_amount))
 # Display results of code below this codeblock
-
+view
 ```
 
 ### Sentence 5
 
-* **Sentence text**: “Going back to the beginning of the year, people connected to Prestage Farms gave Moore \$31,000 in campaign donations.”
-
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: “Going back to the beginning of the year, people connected to Prestage Farms gave Moore \$31,000 in campaign donations. Half are dated two-and-a-half months before the session began.”
+* **Analysis summary**: People associated with Prestage Farms gave Moore's committee $31,200 across six payments in 2018. Three came on March 1, 2018, which is about two and a half months before the session began. The other three donations occurred on June 30, 2018.
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+NC_donors_5 <- cleaned_NC_donors %>%
+  filter(str_detect(employer_name, "PRESTAGE FARMS") & str_detect(committee_name, "MOORE"))
+  
 # Display results of code below this codeblock
-
 ```
 
 -30-
+
