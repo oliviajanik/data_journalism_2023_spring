@@ -84,7 +84,7 @@ view(NC_donors_1)
 
 * **Sentence text**: "This year, the week saw more than $1 million given to state legislative campaigns, the state Republican and Democratic parties and the governor's campaign account."
 
-* **Analysis summary**: Using this code, we were able to confirm that more than /$1 million was donated to state legislative campaigns, the Republican and Democratic parties and the governor's campaign. The total was 1,627,689 dollars.
+* **Analysis summary**: Using this code, we were able to confirm that more than /$1 million was donated to state legislative campaigns, the Republican and Democratic parties and the governor's campaign. The total was 1,052,718.4 dollars.
 
 ```{r}
 # Put code to reverse engineer sentence here
