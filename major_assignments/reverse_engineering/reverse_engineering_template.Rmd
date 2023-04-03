@@ -74,7 +74,7 @@ filter(str_detect(committee_name, "BERGER")) %>%
   group_by(`name_clean`) %>%
   summarise(total_amount = sum(amount)) %>%
   arrange(desc(total_amount)) %>%
-  bind_rows(summarize_all(., ~if(is.numeric(.)) sum(.) else "Total"))
+  adorn_totals
 
 # Display results of code below this codeblock
 view(NC_donors_1)
@@ -136,12 +136,16 @@ view
 ### Sentence 5
 
 * **Sentence text**: “Going back to the beginning of the year, people connected to Prestage Farms gave Moore \$31,000 in campaign donations. Half are dated two-and-a-half months before the session began.”
-* **Analysis summary**: People associated with Prestage Farms gave Moore's committee $31,200 across six payments in 2018. Three came on March 1, 2018, which is about two and a half months before the session began. The other three donations occurred on June 30, 2018.
+* **Analysis summary**: People associated with Prestage Farms gave Moore's committee $31,200 across six payments in 2018. Three came on March 1, 2018, which is about two and a half months before the session began. One donation occurred on June 28, 2018 and the final two occurred on June 30, 2018.
 
 ```{r}
 # Put code to reverse engineer sentence here
 NC_donors_5 <- cleaned_NC_donors %>%
-  filter(str_detect(employer_name, "PRESTAGE FARMS") & str_detect(committee_name, "MOORE")) %>% adorn_totals
+  filter(str_detect(employer_name, "PRESTAGE FARMS") & str_detect(committee_name, "MOORE")) %>%
+  group_by(name_clean, date) %>% 
+  reframe(amount) %>%
+  arrange(date) %>%
+  adorn_totals
   
 # Display results of code below this codeblock
 ```
