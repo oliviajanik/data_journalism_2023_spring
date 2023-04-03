@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
+In this notebook, we are reverse engineering the story, [CEOs gave heavily during legislative session, exposing loophole in NC's fundraising ban](https://www.wral.com/in-session-campaign-donations/17716104/)
 
 ## Load libraries
 
@@ -91,7 +91,8 @@ view(NC_donors_1)
 NC_donors_2 <- cleaned_NC_donors %>% 
 filter(between(date, as.Date('2018-05-09'), as.Date('2018-05-16'))) %>% 
   group_by(source) %>%
-  summarise(total_amount = sum(amount))
+  summarise(total_amount = sum(amount)) %>%
+  adorn_totals
   
 
 # Display results of code below this codeblock
@@ -140,7 +141,7 @@ view
 ```{r}
 # Put code to reverse engineer sentence here
 NC_donors_5 <- cleaned_NC_donors %>%
-  filter(str_detect(employer_name, "PRESTAGE FARMS") & str_detect(committee_name, "MOORE"))
+  filter(str_detect(employer_name, "PRESTAGE FARMS") & str_detect(committee_name, "MOORE")) %>% adorn_totals
   
 # Display results of code below this codeblock
 ```
