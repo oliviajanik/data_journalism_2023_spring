@@ -262,7 +262,7 @@ Those are a little hard to read, so we can turn them 45 degrees to remove the ov
 
 ### Task 15: Run the following code
 **Task** Run the following code. Explain what you see after running the code in the space below. 
-**Answer** The dates are slanted now so they are slightly easier to read, but they are still very crowded.
+**Answer** The dates are slantedl now so they are slightly easier to read, but they are still very crowded.
 ```{r}
 baltco_911_calls_by_date %>%
   ggplot() + 
