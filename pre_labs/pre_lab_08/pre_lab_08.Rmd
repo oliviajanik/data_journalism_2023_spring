@@ -129,7 +129,7 @@ This is a little more useful. But the bottom is kind of a mess, with overlapping
 ```{r}
 baltco_911_calls_by_month %>%
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls)) +
+  geom_bar(aes(x=rmeorder(month,total_calls), weight=total_calls)) +
   coord_flip()
 ```
 
