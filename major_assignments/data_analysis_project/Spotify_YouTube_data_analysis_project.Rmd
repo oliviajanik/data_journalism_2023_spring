@@ -1,0 +1,128 @@
+---
+title: "Spotify and YouTube Music Data Analysis Project"
+author: "Mitchell Hang & Olivia Janik"
+date: "4/14/23"
+output:
+  html_document:
+    theme: cerulean
+    highlight: pygments
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+In this notebook, we are analyzing a dataset which features statistics for the top 10 songs of various artists on Spotify and their corresponding YouTube videos. (https://www.kaggle.com/datasets/salvatorerastelli/spotify-and-youtube)
+
+## Load libraries
+
+Loading required libraries for this analysis.
+
+```{r echo=FALSE, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+## Load and Cleaning Data
+
+In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
+The Spotify and Youtube data has 20,718 observations of 28 variables. The main variables we will be working with in this data are number of streams, danceability, valence, key, and views on Youtube. After looking more closely at the data, we believe that we will be able to answer all of the questions we posed in the previous milestone.
+
+```{r}
+# Load required data
+
+# Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
+
+# Clean required data and prepare for analysis if needed. 
+
+Spotify_Youtube <- read_csv("data/Spotify_Youtube.csv")
+
+Spotify_Youtube_clean <- Spotify_Youtube %>%
+  clean_names()
+
+```
+
+## Questions to Analyze
+In this notebook, we are using data analysis to answer five newsworthy questions.
+
+### Question 1
+
+* **Question text**: What is the correlation between a song’s “danceability” and its number of streams?
+* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
+### Question 2
+
+* **Question text**: What mood of song gets more streams, happy songs (0.8 valence or higher) or sad songs (0.2 valence or lower)?
+* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
+### Question 3
+
+* **Question text**: What is the correlation between a song’s key and its valence? Do certain keys register positive emotions while others register negative emotions?
+* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
+### Question 4
+
+* **Question text**: What artist has the most songs in the top 100 most streamed songs on Spotify?
+* **Analysis summary**: The artist who has the most songs in the top 100 most streamed songs on Spotify is Post Malone, with five songs: "rockstar (feat. 21 Savage)," "Sunflower - Spider-Man: Into the Spider-Verse," "Circles," "Better Now" and "Congratulations."
+
+```{r}
+# Put code to reverse engineer sentence here
+
+Spotify_Youtube_clean %>%
+  arrange(desc(stream)) %>%
+  slice(1:100) %>%
+  group_by(artist) %>%
+  summarize(total_songs = n()) %>%
+  arrange(desc(total_songs))
+
+# Display results of code below this codeblock
+
+```
+
+### Question 5
+
+* **Question text**: Which song has the most combined Spotify streams and YouTube views (from its official video)?
+* **Analysis summary**: "Despacito" by Luis Fonsi feat. Daddy Yankee has the most combined Spotify streams and YouTube views -- not just for a collaboration -- but for any artist(s) -- with 9,586,247,629 views and streams combined (we used the higher number of views for the song for simplicity's sake. For a solo artist, the song with the most combined Spotify streams and YouTube views is "Shape of You" by Ed Sheeran, with 9,270,403,680 views and streams combined. Interestingly, "Despacito" has a higher ratio of Spotify streams to YouTube views than "Shape of You" (~5.363:1 versus ~1.757:1.)
+
+```{r}
+# Put code to reverse engineer sentence here
+
+Spotify_Youtube_clean %>%
+  filter(official_video = TRUE) %>%
+  mutate(views_and_streams = views + stream) %>%
+  arrange(desc(views_and_streams)) %>%
+  summarize(artist, track, views, stream, views_and_streams)
+
+# Display results of code below this codeblock
+
+```
+
+-30-
