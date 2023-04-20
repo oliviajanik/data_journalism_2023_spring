@@ -1,0 +1,121 @@
+---
+title: "lab_10"
+author: "Derek Willis"
+date: "2023-04-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+* Our usual libraries, plus some of the map-specific ones from the pre_lab. You'll also be fetching Census data in Q3. Read the questions carefully!
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab.
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+library(tidycensus)
+library(tigris)
+
+```
+
+Let's explore Maryland elections, power outages and electric vehicle data and make some maps! 
+
+## Questions 
+
+**Q1.** Maryland voters made history in November by electing the state's first two African-American statewide office holders: Wes Moore as governor and Anthony Brown as attorney general. You want to compare the two's electoral performances. Using the `md_statewide_county.csv` file in the data folder, calculate the total number of votes for both the governor's race and the attorney general's race, then percentages for both Moore and Brown _based on the total of their respective contests_. Then calculate the difference between their percentages.
+
+Get the geometry for Maryland's counties using tigris and, joining that dataframe to your results dataframe, make a county-level map of the differences between Moore and Brown's percentages. What is the story here, and what is the county with the most interesting results?
+
+**A1.** Wes Moore had 7 or more percent more of the vote than Anthony Brown in Queen Anne's, Kent and Carroll counties. He only had less percent of the vote than Brown in one county, Prince George's. What I would like to research based on this map, is what made Wes Moore more popular than Anthony Brown in the three counties I highlighted above. Was it about the two candidates we look at, or was it more about the unpopularity of Dan Cox as a candidate for governor with more traditional conservatives.
+
+```{r}
+md_statewide_county <- read_csv("data/md_statewide_county.csv") %>%
+mutate(total_gov = Cox+ Moore + Lashar + Wallace + Harding + Sefcik + GovWritein) %>%
+mutate(total_ag = Peroutka + Brown + AgWritein) %>%
+mutate(pct_moore = (Moore/total_gov)*100) %>%
+mutate(pct_brown = (Brown/total_ag)*100) %>%
+mutate(difference = pct_moore - pct_brown) %>%
+mutate(GEOID = as.character(GEOID))
+
+counties <- counties()
+md_counties <- counties %>%
+  filter(STATEFP == "24")
+
+counties_with_votes <- md_counties %>% left_join(md_statewide_county, by=c("GEOID"))
+
+ggplot() +
+  geom_sf(data=counties_with_votes, aes(fill=difference)) +
+  scale_colour_viridis_b(option="magma") +
+  theme_minimal()
+
+
+```
+
+**Q2.** Make a county-level map to explore the number of customers impacted by power outages in Maryland. Load the `county_outages_march2023.csv` file in the data folder and calculate a rate of customers with outages per 10,000 total customers for each county. Then join that dataframe to your Maryland counties dataframe you made in Q1 and create a county-level map of the results; you may need to tweak the fill scale to make the distinctions clearer. What's the potential story here? Given access to other months' outage data, what would your next steps be in reporting a story?
+
+**A2.** There is a clear outlier here in Talbot County with a rate of about 1,989 outages per 10,000 customers which is hundreds more than any other county. If I could look at other months, I would look to see what the rate is like in other months? Is March 2023 unique or does Talbot County routinely have a far higher rate of outages? I would also look more in depth at what happened in Talbot County last month. I looked online and saw that Talbot was among the areas that experienced severe weather three weeks ago, but other counties did too and did not have the same amount of outages. Another reason for high power outages could be construction damaging power lines or overload causing blackouts. I'd look into county records to see when the last time the power grid was updated and when it was put in place because this might be an infrastructure issue.
+
+```{r}
+county_outages_march2023 <- read_csv("data/county_outages_march2023.csv") %>% 
+mutate(per_10000_rate = (outage_customers/total_customers)*10000)
+
+counties <- counties()
+md_counties <- counties %>%
+  filter(STATEFP == "24")
+
+counties_with_rate <- md_counties %>% left_join(county_outages_march2023, by=c("NAME"= "county"))
+
+ggplot() +
+  geom_sf(data=counties_with_rate, aes(fill=per_10000_rate)) +
+  scale_colour_viridis_b(option="magma") +
+  theme_minimal()
+
+```
+
+**Q3.** You've been assigned a story about the use of electric vehicles in Maryland and you want to make a map of the prevalence of electric vehicles in each county. Load the `ev_2020_2023.csv` file, which has the number of electric and hybrid vehicles per county from July 2020 and March 2023 and calculate a percentage change for each county (remember, that's `new-old/old`). Using the Maryland counties dataframe you made for Q1, make a county map showing the percentage change.What counties stand out to you? What questions do you have about the changes you're seeing?
+
+Next, use tidycensus to retrieve county population data for Maryland from 2021 (you did this in the pre_lab) and join it to your vehicles dataframe. HINT: you may not need to join it on the county name, and you should already have the geometry!
+
+Then, calculate a per capita rate of electric & hybrid vehicles using the March 2023 figure and the population estimate. You will need to choose the "per capita" value.
+
+Finally, make a second county map showing the per capita rate. What counties stand out on this map? How is it different from the first one you made?
+
+**A3.** Caroline County, out on the Eastern Shore, had a percent increase of 4.26% in less than three years. I want to know if the county or one of the towns passed bills promoting electric vehicles or if there was a population change where people who already had electric vehicles moved to Caroline County. I'd also look at new car dealerships that opened in the county with electric vehicles for sale because it could be as simple as more availability. As for the second map, Howard and Montgomery have the most electric vehicles per 1000 residents with 20 or more cars. This is different than the first ev map because Howard and Montgomery did not have the largest percent increase, meaning that people already had a high number of electric vehicles in 2020. This is not surprising to me because Howard and Montgomery are known to have wealthy and liberal residents that would make the investment in an electric vehicle.
+
+```{r}
+ev_2020_2023 <- read_csv("data/ev_2020_2023.csv") %>%
+mutate(pct_change = (march_2023-july_2020)/july_2020)
+
+counties_with_ev <- md_counties %>% left_join(ev_2020_2023, by=c("NAME"= "county"))
+
+ggplot() +
+  geom_sf(data=counties_with_ev, aes(fill=pct_change)) +
+  scale_colour_viridis_b(option="magma") +
+  theme_minimal()
+
+md_county_population <- get_acs(geography = "county",
+              variables = c(population = "B01001_001"),
+              year = 2021,
+              state = "MD")
+
+md_pop_with_ev<- counties_with_ev%>%
+  left_join(md_county_population, by=c("GEOID"))
+
+md_pop_with_ev <- md_pop_with_ev %>%
+mutate(per_capita_ev = (march_2023/estimate)*1000)
+
+ggplot() +
+  geom_sf(data=md_pop_with_ev, aes(fill=per_capita_ev)) +
+  scale_colour_viridis_b(option="magma") +
+  theme_minimal()
+```
+
