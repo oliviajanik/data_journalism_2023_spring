@@ -33,7 +33,7 @@ library(janitor)
 ## Load and Cleaning Data
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
-The Spotify and Youtube data has 20,718 observations of 28 variables. The main variables we will be working with in this data are number of streams, danceability, valence, key, and views on Youtube. After looking more closely at the data, we believe that we will be able to answer all of the questions we posed in the previous milestone.
+The Spotify and Youtube data has 20,718 observations of 28 variables. The main variables we will be working with in this data are number of streams, danceability, valence, key, and views on Youtube. After looking more closely at the data, we believe that we will be able to answer all of the questions we posed in the previous milestone. There were 1,655 songs with NA in at least one of their columns so we removed them from the data set for simplification.
 
 ```{r}
 # Load required data
@@ -45,7 +45,9 @@ The Spotify and Youtube data has 20,718 observations of 28 variables. The main v
 Spotify_Youtube <- read_csv("data/Spotify_Youtube.csv")
 
 Spotify_Youtube_clean <- Spotify_Youtube %>%
-  clean_names()
+  clean_names() %>%
+  drop_na()
+
 
 ```
 
@@ -55,10 +57,28 @@ In this notebook, we are using data analysis to answer five newsworthy questions
 ### Question 1
 
 * **Question text**: What is the correlation between a song’s “danceability” and its number of streams?
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: When we asked this question, our original hypothesis was that songs with high danceability would have more streams. However, after filtering the data to only show the columns we needed to answer this question and plotting the 100 most streamed songs with the number of streams and their danceability score in a scatter plot, we discovered that there is not a strong relationship between danceability and number of streams once a song hits a certain level of danceability. We think it is worth noting that the lowest danceability score in the top 100 streamed songs is 0.351, but after that there is no clear pattern.
 
 ```{r}
-# Put code to reverse engineer sentence here
+Spotify_Youtube_clean_Q1 <- Spotify_Youtube_clean %>%
+arrange(desc(stream)) %>%
+  mutate(stream_in_billions = (stream/1000000000)) %>%
+    slice(1:100) %>%
+  summarize(artist, track, danceability, stream, stream_in_billions)
+
+Spotify_Youtube_clean_Q1 %>%
+ ggplot() +
+   geom_point(aes(x=danceability, y=stream_in_billions)) +
+    xlim(0,1) +
+     theme_minimal() +
+    
+    labs(
+    title="No apparent relationship between number of streams and song's danceability",
+    x = "Danceability",
+    y = "Number of Spotify streams in billions",
+    caption = "Source: Kaggle"
+    
+  )
 
 # Display results of code below this codeblock
 
