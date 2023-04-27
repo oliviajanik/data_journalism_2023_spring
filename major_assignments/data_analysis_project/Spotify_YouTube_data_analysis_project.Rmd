@@ -28,6 +28,8 @@ Loading required libraries for this analysis.
 library(tidyverse)
 library(lubridate)
 library(janitor)
+library(ggthemes)
+library(scales)
 ```
 
 ## Load and Cleaning Data
@@ -57,28 +59,40 @@ In this notebook, we are using data analysis to answer five newsworthy questions
 ### Question 1
 
 * **Question text**: What is the correlation between a song’s “danceability” and its number of streams?
-* **Analysis summary**: When we asked this question, our original hypothesis was that songs with high danceability would have more streams. However, after filtering the data to only show the columns we needed to answer this question and plotting the 100 most streamed songs with the number of streams and their danceability score in a scatter plot, we discovered that there is not a strong relationship between danceability and number of streams once a song hits a certain level of danceability. We think it is worth noting that the lowest danceability score in the top 100 streamed songs is 0.351, but after that there is no clear pattern.
+* **Analysis summary**: 
 
 ```{r}
 Spotify_Youtube_clean_Q1 <- Spotify_Youtube_clean %>%
-arrange(desc(stream)) %>%
-  mutate(stream_in_billions = (stream/1000000000)) %>%
-    slice(1:100) %>%
-  summarize(artist, track, danceability, stream, stream_in_billions)
-
+  mutate(stream_in_millions = (stream/1000000)) %>%
+    mutate(danceability_interval = case_when(
+    danceability <= 0.1 ~ "0-0.1",
+    danceability <= 0.2 ~ "0.101-0.2",
+    danceability <= 0.3 ~ "0.201-0.3",
+    danceability <= 0.4 ~ "0.301-0.4",
+    danceability <= 0.5 ~ "0.401-0.5",
+    danceability <= 0.6 ~ "0.501-0.6",
+    danceability <= 0.7 ~ "0.601-0.7",
+    danceability <= 0.8 ~ "0.701-0.8",
+    danceability <= 0.9 ~ "0.801-0.9",
+    danceability <= 1 ~ "0.901-1"
+    )) %>%
+   group_by(danceability_interval) %>%
+  summarise(average = mean(stream_in_millions)) %>%
+  arrange(desc(average))
+  
 Spotify_Youtube_clean_Q1 %>%
- ggplot() +
-   geom_point(aes(x=danceability, y=stream_in_billions)) +
-    xlim(0,1) +
-     theme_minimal() +
-    
+    ggplot() +
+  geom_bar(aes(x=danceability_interval, weight=average)) +
+  theme_few () +
+  scale_fill_few("Light") +
     labs(
-    title="No apparent relationship between number of streams and song's danceability",
-    x = "Danceability",
-    y = "Number of Spotify streams in billions",
-    caption = "Source: Kaggle"
+    title="Songs with higher danceability score tend to have more streams",
+    x = "Danceability interval",
+    y = "average number of streams in millions",
+    caption = "source: Kaggle"
     
   )
+
 
 # Display results of code below this codeblock
 
@@ -130,7 +144,7 @@ Spotify_Youtube_clean %>%
 ### Question 5
 
 * **Question text**: Which song has the largest difference between Spotify streams and Youtube views from its official video. 
-* **Analysis summary**: "Despacito" by Luis Fonsi feat. Daddy Yankee has the largest difference between Spotify streams and YouTube views, with a difference of more than 6.5 billion, nearly 2 billion more than the difference of the song on the list. The official video for "Despacito" was once the most viewed YouTube video ever, so it makes sense as to why the difference in streams and views is so large. The only artist to have two songs in the top 10 largest differences was CoComelon, a children's music YouTube channel. 
+* **Analysis summary**: "Despacito" by Luis Fonsi feat. Daddy Yankee has the largest difference between Spotify streams and YouTube views, with a difference of more than 6.5 billion, nearly 2 billion more than the difference of the next song, Wheels on the Bus by CoComelon. The official video for "Despacito" was once the most viewed YouTube video ever, so it makes sense as to why the difference in streams and views is so large. The only artist to have two songs in the top 10 largest differences was CoComelon, a children's music YouTube channel. Wheels on the Bus by CoComelon has a higher views-to-stream ratio than Despacito, most likely because parents play the video to entertain their children rather than the song.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -138,8 +152,9 @@ Spotify_Youtube_clean %>%
 Spotify_Youtube_clean %>%
   filter(official_video = TRUE) %>%
   mutate(difference = abs(views - stream)) %>%
+  mutate(views_to_stream_ratio = views/stream) %>%
   arrange(desc(difference)) %>%
-  summarize(artist, track, views, stream, difference)
+  summarize(artist, track, views, stream, difference, views_to_stream_ratio)
 
 # Display results of code below this codeblock
 
