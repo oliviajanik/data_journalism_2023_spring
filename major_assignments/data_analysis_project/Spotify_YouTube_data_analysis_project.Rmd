@@ -129,17 +129,17 @@ Spotify_Youtube_clean %>%
 
 ### Question 5
 
-* **Question text**: Which song has the most combined Spotify streams and YouTube views (from its official video)?
-* **Analysis summary**: "Despacito" by Luis Fonsi feat. Daddy Yankee has the most combined Spotify streams and YouTube views -- not just for a collaboration -- but for any artist(s) -- with 9,586,247,629 views and streams combined (we used the higher number of views for the song for simplicity's sake. For a solo artist, the song with the most combined Spotify streams and YouTube views is "Shape of You" by Ed Sheeran, with 9,270,403,680 views and streams combined. Interestingly, "Despacito" has a higher ratio of Spotify streams to YouTube views than "Shape of You" (~5.363:1 versus ~1.757:1.)
+* **Question text**: Which song has the largest difference between Spotify streams and Youtube views from its official video. 
+* **Analysis summary**: "Despacito" by Luis Fonsi feat. Daddy Yankee has the largest difference between Spotify streams and YouTube views, with a difference of more than 6.5 billion, nearly 2 billion more than the difference of the song on the list. The official video for "Despacito" was once the most viewed YouTube video ever, so it makes sense as to why the difference in streams and views is so large. The only artist to have two songs in the top 10 largest differences was CoComelon, a children's music YouTube channel. 
 
 ```{r}
 # Put code to reverse engineer sentence here
 
 Spotify_Youtube_clean %>%
   filter(official_video = TRUE) %>%
-  mutate(views_and_streams = views + stream) %>%
-  arrange(desc(views_and_streams)) %>%
-  summarize(artist, track, views, stream, views_and_streams)
+  mutate(difference = abs(views - stream)) %>%
+  arrange(desc(difference)) %>%
+  summarize(artist, track, views, stream, difference)
 
 # Display results of code below this codeblock
 

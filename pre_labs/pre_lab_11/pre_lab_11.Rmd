@@ -141,7 +141,7 @@ Let's say we are interested in 2023, so all we need to do now is to store that f
 
 ### Task 5: Save one table from the HTML source
 **Task** Run the following code in the gray-colored codeblock below to extract all tables in the HTML and save it as a dataframe. What do you notice about the columns?
-**Answer** 
+**Answer** There are two columns, the date the press release is sent out and the title of the press release.
 
 ```{r}
 # Read in all html from table, store all tables on page as nested list of dataframes.
@@ -165,7 +165,7 @@ Then let's use slice() to remove the last row -- row number 25 -- which contains
 
 ### Task 6: Clean up the data
 **Task** Run the following code to extract the table we want, clean up the names and change the date column to an actual date. Look at the dataframe; what other information about these releases might you want to add?
-**Answer** 
+**Answer** Having the url to the press release itself as a column.
 
 ```{r}
 # Read in all html from table, get the HTML table.
@@ -219,7 +219,7 @@ Once again we get a list of two as our result. In this case, we don't want to is
 
 ### Task 10: Isolate the list of `li` tags inside the HTML using `html_elements`
 **Task** Run the following code in the gray-colored codeblock below to find the <li> tags. What does the output suggest about how many <ul> tags there are in the HTML source?
-**Answer** 
+**Answer** There appear to be 122 <li> tags on this webpage.
 
 ```{r}
 osp_results %>% html_elements('li')
@@ -229,7 +229,7 @@ Good news and bad news here: we have all of the <li> tags, but we have lots of t
 
 ### Task 10: Isolate the text of `li` tags inside the HTML using `html_text`
 **Task** Run the following code in the gray-colored codeblock below to find the text inside <li> tags. Describe the output:
-**Answer** 
+**Answer** The first 16 tags are menu items for the page. The press releases begin at row 17.
 
 ```{r}
 osp_results %>% html_elements('li') %>% html_text()
@@ -239,7 +239,7 @@ Ok, so now we can see the press releases. But they are surrounded by a bunch of 
 
 ### Task 11: Turn the contents of the <li> tags into a dataframe
 **Task** Run the following code in the gray-colored codeblock below to make a dataframe. Describe the output:
-**Answer** 
+**Answer** There is only one column and all the information is in there. The menu items also appear in the dataframe.
 
 ```{r}
 releases <- osp_results %>% html_elements('li') %>% html_text() %>% as_tibble()
