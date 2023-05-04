@@ -1,0 +1,88 @@
+---
+title: "lab_12"
+author: "derek willis"
+date: "2023-05-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+* tidytext and our usual libraries
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab.
+```{r}
+library(tidyverse)
+library(tidytext)
+library(janitor)
+library(lubridate)
+library(rvest)
+```
+
+## Questions
+
+**Q1.** You've been assigned to report a story about the leading reasons that Maryland attorneys get sanctioned by the state for misconduct. The state [publishes lists of sanctions](https://www.courts.state.md.us/attygrievance/sanctions) that contain a short text description about the situation. Load the CSV file in the data folder containing records from fiscal year 2011 onwards. Make a list of unique words from the text column, then following the example in the pre_lab, remove common "stop words" from that list and create a list of the top 10 words containing the percentage of occurrences each word represents. What's the leading word in that answer and, broadly, what do you think the top 10 words describe?
+
+**A1.** The most frequently used word in this list is "failing" used 4.7%. These words seem to describe the general reason for the reprimand. The words "trust", "account" and "funds" all appear in the top 10, which may suggest that many of these reprimands occurred because of the misuse of money or other financial disdeeds. However, to determine this, I would need to understand the context of these words in the reprimand and whether it is the right usage of the word.
+
+```{r}
+md_attorney_sanctions <- read_csv("data/md_attorney_sanctions.csv")
+
+a_list_of_words <- c("Dog", "dog", "dog", "cat", "cat", ",")
+unique(a_list_of_words)
+unique_words <- md_attorney_sanctions %>% 
+  select(text) %>%
+  unnest_tokens(word, text)
+View(unique_words)
+
+data("stop_words")
+stop_words <- stop_words %>%
+  add_row(word = "maryland") %>%
+  add_row(word = 'state') %>% 
+  add_row(word = 'u.s') %>% 
+  add_row(word = 'md') %>% 
+  add_row(word = 'attorney')
+
+unique_words %>%
+  anti_join(stop_words) %>%
+  group_by(word) %>%
+  tally(sort=TRUE) %>%
+    mutate(percent = (n/sum(n))*100) %>%
+  top_n(10)
+```
+
+**Q2.** Let's move beyond single words to phrases. Make a list of the top 10 three-word phrases, called trigrams, based on the example from the pre_lab (you'll need to modify the example code to do this). What's the top trigram and how often does it appear? What does that phrase mean in legal terms?
+
+**A2.** The top trigrams are "conduct involving dishonesty" and "dishonesty fraud deceit" which is the typically second part of the same sentence in which "conduct involving dishonesty appears". Both these phrases appear 155 times. The full phrase where I found these trigrams is "engaging in conduct involving dishonesty, fraud, deceit, or misrepresentation." This phrase means that the lawyer who was disciplined lied about something, committed fraud, deceived someone, or misrepresented themselves or something. "Involving dishonesty fraud" also appears 153 times, which appears to be a variation of the top trigrams.
+
+```{r}
+md_attorney_sanctions %>%
+  unnest_tokens(trigram, text, token = "ngrams", n = 3) %>%
+  separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word) %>%
+  filter(!word3 %in% stop_words$word) %>%
+  mutate(trigram = paste(word1, word2, word3, sep=" ")) %>%
+  group_by(trigram) %>%
+  tally(sort=TRUE) %>%
+  top_n(10)
+```
+
+**Q3.** Let's drop back down to more traditional text analysis - take the top trigram from Q2 and write code to see how many times it occurs in the text column in each fiscal year. What do you think the answer produced by your code suggests? What else could you do to try and clarify the most important reasons attorneys get sanctioned?
+
+**A3.** The year with the most attorney sanctions where one of the reasons for reprimand was "conduct involving dishonesty" was 2021, with 33 sanctions using the phrase "conduct involving dishonesty." 2019, 2020 and 2022 all had numbers in the upper 20s, then the next highest number was 12 in 2017. The number of attorneys in Maryland slightly increased in the 2021 fiscal year according to the commission's annual report, but the number of files opened decreased. In 2021, there were 81 sanctioned attorneys, which means that more than 1/3 of sanctions mentioned conduct involving dishonesty. Another item that I wanted to look at was the increase from 7 "conduct involving dishonesty" mentions in 2018 to 29 in 2019. Just before the start of the 2019 fiscal year, these changes were made to the commission: Jason Bogue took over for Marc Fielder as lead investigator, Deborah Potter was appointed as the chair of the peer review committee and the office of the bar counsel hired four counsels/attorneys. Perhaps the new staff placed more emphasis on dishonesty cases than their predecessors.I would like to look at the ratio of sanctions each year mentioning "conduct involving dishonesty" to the total sanctions as well.
+
+```{r}
+md_attorney_sanctions %>%
+filter(str_detect(text, "conduct involving dishonesty")) %>%
+group_by(fiscal_year) %>%
+summarise(total_sanctions = n()) %>%
+arrange(desc(total_sanctions))
+
+
+```
