@@ -101,25 +101,20 @@ Spotify_Youtube_clean_Q1 %>%
 ### Question 2
 
 * **Question text**: What mood of song gets more streams, happy songs (0.8 valence or higher) or sad songs (0.2 valence or lower)?
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: Songs with a valence of 0.8 or more (happy songs) have an average 144.9 million streams, more than songs with a valence of 0.2 or less, which have an average of 125.3 million streams. However, the valence interval with the lowest average streams is 0.4 to 0.6, songs with a medium valence. 
 
 ```{r}
 # Put code to reverse engineer sentence here
 Spotify_Youtube_clean_Q2 <- Spotify_Youtube_clean %>%
   mutate(stream_in_millions = (stream/1000000)) %>%
-    mutate(danceability_interval = case_when(
-    valence <= 0.1 ~ "0-0.1",
-    valence <= 0.2 ~ "0.101-0.2",
-    danceability <= 0.3 ~ "0.201-0.3",
-    danceability <= 0.4 ~ "0.301-0.4",
-    danceability <= 0.5 ~ "0.401-0.5",
-    danceability <= 0.6 ~ "0.501-0.6",
-    danceability <= 0.7 ~ "0.601-0.7",
-    danceability <= 0.8 ~ "0.701-0.8",
-    danceability <= 0.9 ~ "0.801-0.9",
-    danceability <= 1 ~ "0.901-1"
+    mutate(valence_interval = case_when(
+    valence <= 0.2 ~ "0-0.2",
+    valence <= 0.4 ~ "0.2-0.4",
+    danceability <= 0.6 ~ "0.4-0.6",
+    danceability <= 0.8 ~ "0.6-0.8",
+    danceability <= 1 ~ "0.8-1",
     )) %>%
-   group_by(danceability_interval) %>%
+   group_by(valence_interval) %>%
   summarise(average = mean(stream_in_millions)) %>%
   arrange(desc(average))
 # Display results of code below this codeblock
