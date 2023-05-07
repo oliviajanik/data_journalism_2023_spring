@@ -59,7 +59,7 @@ In this notebook, we are using data analysis to answer five newsworthy questions
 ### Question 1
 
 * **Question text**: What is the correlation between a song’s “danceability” and its number of streams?
-* **Analysis summary**: 
+* **Analysis summary**: In this question we separated songs into 10 danceability intervals and coded the average mean for each interval. Through this code, we found that songs with higher danceability tend to have more streams on average. Songs with a danceability of less than 0.2 have far lower average number of streams while the danceability intervals with the most number of streams are the top 3 intervals.
 
 ```{r}
 Spotify_Youtube_clean_Q1 <- Spotify_Youtube_clean %>%
