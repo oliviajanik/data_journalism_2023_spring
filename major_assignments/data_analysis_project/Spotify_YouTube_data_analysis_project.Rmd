@@ -124,12 +124,20 @@ Spotify_Youtube_clean_Q2 <- Spotify_Youtube_clean %>%
 ### Question 3
 
 * **Question text**: What is the correlation between a song’s key and its valence? Do certain keys register positive emotions while others register negative emotions?
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: There seems to be no apparent relation between a song's key and its valance. Initially, we thought that a natural key would result in a positive emotion being registered whereas an accidental (sharp or flat) would register a negative emotion, but upon graphing the respective data points, we notice that each of the keys were filled for all possible amounts of valence from 0 to 1.
+
 
 ```{r}
-# Put code to reverse engineer sentence here
-
-# Display results of code below this codeblock
+potify_Youtube_clean_Q3 <- Spotify_Youtube_clean %>%
+ ggplot() +
+   geom_point(aes(x=key, y=valence)) +
+    theme_minimal() +
+    labs(
+    title="No apparent relationship between song's key and valence",
+    x = "Key (0 is C, 1 is C#, 2 is D, etc.)",
+    y = "Valence",
+    caption = "Source: Kaggle"
+  )
 
 ```
 
