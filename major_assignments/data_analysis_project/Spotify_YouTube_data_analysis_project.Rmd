@@ -30,6 +30,7 @@ library(lubridate)
 library(janitor)
 library(ggthemes)
 library(scales)
+library(corrr)
 ```
 
 ## Load and Cleaning Data
@@ -59,7 +60,7 @@ In this notebook, we are using data analysis to answer five newsworthy questions
 ### Question 1
 
 * **Question text**: What is the correlation between a song’s “danceability” and its number of streams?
-* **Analysis summary**: In this question we separated songs into 10 danceability intervals and coded the average mean for each interval. Through this code, we found that songs with higher danceability tend to have more streams on average. Songs with a danceability of less than 0.2 have far lower average number of streams while the danceability intervals with the most number of streams are the top 3 intervals.
+* **Analysis summary**: In this question we separated songs into 10 danceability intervals and coded the average mean for each interval. Through this code, we found that songs with higher danceability tend to have more streams on average. Songs with a danceability of less than 0.2 have far lower average number of streams while the danceability intervals with the most number of streams are the top 3 intervals. We also created a scatter plot of songs danceability vs. number of streams with a trendline, while the trendline showed there was a positive relationship between the 2 variables, it did not appear to be significant based on its slope. To confirm this, we ran a correlate test, which showed that the r-value is 0.072, which means there is a very weak positive relationship between the two.
 
 ```{r}
 Spotify_Youtube_clean_Q1 <- Spotify_Youtube_clean %>%
@@ -92,8 +93,16 @@ Spotify_Youtube_clean_Q1 %>%
     caption = "source: Kaggle"
     
   )
+Spotify_Youtube_clean %>%
+  ggplot() +
+  geom_point(aes(x=danceability,y=stream)) +
+  geom_smooth(aes(x=danceability,y=stream ), method="lm")
 
-
+Spotify_Youtube_clean %>%
+  select(danceability, stream) %>%
+  correlate()
+  
+#glimpse(Spotify_Youtube_clean)
 # Display results of code below this codeblock
 
 ```
@@ -110,9 +119,9 @@ Spotify_Youtube_clean_Q2 <- Spotify_Youtube_clean %>%
     mutate(valence_interval = case_when(
     valence <= 0.2 ~ "0-0.2",
     valence <= 0.4 ~ "0.2-0.4",
-    danceability <= 0.6 ~ "0.4-0.6",
-    danceability <= 0.8 ~ "0.6-0.8",
-    danceability <= 1 ~ "0.8-1",
+    valence <= 0.6 ~ "0.4-0.6",
+    valence <= 0.8 ~ "0.6-0.8",
+    valence <= 1 ~ "0.8-1",
     )) %>%
    group_by(valence_interval) %>%
   summarise(average = mean(stream_in_millions)) %>%
@@ -155,6 +164,11 @@ Spotify_Youtube_clean %>%
   group_by(artist) %>%
   summarize(total_songs = n()) %>%
   arrange(desc(total_songs))
+
+Spotify_Youtube_clean %>%
+  group_by(artist) %>%
+  summarise(average = mean(stream)) %>%
+  arrange(desc(average))
 
 # Display results of code below this codeblock
 
