@@ -159,20 +159,14 @@ potify_Youtube_clean_Q3 <- Spotify_Youtube_clean %>%
 ### Question 4
 
 * **Question text**: What artist has the most songs in the top 100 most streamed songs on Spotify?
-* **Analysis summary**: The artist who has the most songs in the top 100 most streamed songs on Spotify is Post Malone, with five songs: "rockstar (feat. 21 Savage)," "Sunflower - Spider-Man: Into the Spider-Verse," "Circles," "Better Now" and "Congratulations."
+* **Analysis summary**: The artist with the highest average streams is Post Malone, with an average of 1.525 billion streams for his top 10 songs. He is the only artist with more than 1.5 billion average streams, the next most streamed artist is Ed Sheeran, with nearly 100 million less streams on average. There are 16 artists who average more than 1 billion streams for their top 10 songs.
 
 ```{r}
 # Put code to reverse engineer sentence here
-
 Spotify_Youtube_clean %>%
-  arrange(desc(stream)) %>%
+  mutate(stream_in_billions = (stream/1000000000)) %>%
   group_by(artist) %>%
-  summarize(total_songs = n()) %>%
-  arrange(desc(total_songs))
-
-Spotify_Youtube_clean %>%
-  group_by(artist) %>%
-  summarise(average = mean(stream)) %>%
+  summarise(average = mean(stream_in_billions)) %>%
   arrange(desc(average))
 
 # Display results of code below this codeblock
