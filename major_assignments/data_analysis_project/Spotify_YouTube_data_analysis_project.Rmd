@@ -110,7 +110,7 @@ Spotify_Youtube_clean %>%
 ### Question 2
 
 * **Question text**: What mood of song gets more streams, happy songs (0.8 valence or higher) or sad songs (0.2 valence or lower)?
-* **Analysis summary**: Songs with a valence of 0.8 or more (happy songs) have an average 144.9 million streams, more than songs with a valence of 0.2 or less, which have an average of 125.3 million streams. However, the valence interval with the lowest average streams is 0.4 to 0.6, songs with a medium valence. 
+* **Analysis summary**: We sorted the songs into five valence intervals and then found the average number of streams in millions. We found that songs with the highest and lowest valence intervals have the fewest average streams while the middle interval has the most. After this, we ran a correlation test to see if there is any correlation between valence and number of streams. Our correlation test found that the r-value for valence and streams is -0.011, meaning that there is a very weak negative relationship between the two, but the relationship is so weak that it does not appearing to be meaningful. To confirm that, we ran the cor.test to determine the p-value. The p-value is 0.1177, which means it is not statistically significant. 
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -126,6 +126,12 @@ Spotify_Youtube_clean_Q2 <- Spotify_Youtube_clean %>%
    group_by(valence_interval) %>%
   summarise(average = mean(stream_in_millions)) %>%
   arrange(desc(average))
+
+Spotify_Youtube_clean %>%
+  select(valence, stream) %>%
+  correlate()
+
+cor.test(Spotify_Youtube_clean$valence, Spotify_Youtube_clean$stream)
 # Display results of code below this codeblock
 
 ```
@@ -160,7 +166,6 @@ potify_Youtube_clean_Q3 <- Spotify_Youtube_clean %>%
 
 Spotify_Youtube_clean %>%
   arrange(desc(stream)) %>%
-  slice(1:100) %>%
   group_by(artist) %>%
   summarize(total_songs = n()) %>%
   arrange(desc(total_songs))
